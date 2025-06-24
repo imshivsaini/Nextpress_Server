@@ -5,13 +5,13 @@ export const AddUrl = async(req,res) =>{
       url: req.body.url,
     });
     if (response) {
-      return res.status(401).json("Already exist");
+      return res.status(401).json({ success: false, message: "Already Exists" });
     }
     await url.create(req.body);
-    return res.status(200).json("Added Successfully");
+    return res.status(200).json({ success: true, message: "Added Successfully" });
   } catch (err) {
     console.log(err);
-    return res.status(500).json("Server Error");
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 }
 
