@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
+
 export const Register = async (req, res) => {
   try {
     const { email, password, username } = req.body;
@@ -42,7 +43,7 @@ export const Login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
-    res.cookie("token",token,{maxAge:3600000,httponly: true});
+    res.cookie("token", token, { maxAge: 3600000, httponly: true });
     return res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
