@@ -7,7 +7,7 @@ export const AddUrl = async (req, res) => {
     });
     if (response) {
       return res
-        .status(401)
+        .status(409)
         .json({ success: false, message: "Already Exists" });
     }
     await url.create(req.body);
@@ -56,6 +56,22 @@ export const UpdateSpeUrl = async (req, res) => {
     return res
       .status(200)
       .json({ success: true, message: "Updated Successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ success: false, error: err });
+  }
+};
+
+export const DeleteUrl = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = await url.findByIdAndDelete(id);
+    if (!data) {
+      return res.status(404).json({ success: false, message: "Url not found" });
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "Deleted Successfully" });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ success: false, error: err });

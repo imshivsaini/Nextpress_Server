@@ -43,7 +43,13 @@ export const Login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
-    res.cookie("token", token, { maxAge: 3600000, httponly: true });
+    res.cookie("token", token, {
+      maxAge: 7200000, // 2 hours in milliseconds
+      httpOnly: true,
+      secure: false, // Set to true only in production with HTTPS
+      sameSite: "lax", // Important for cross-site requests
+      path: "/",
+    });
     return res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);

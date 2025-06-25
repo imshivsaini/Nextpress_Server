@@ -1,17 +1,16 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-dotenv.config();
-const SECRET_KEY = process.env.SECRET_KEY;
 
+dotenv.config();
+
+const SECRET_KEY = process.env.JWT_SECRET;
 
 export const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const token = req.cookies.token;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!token) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-
-  const token = authHeader.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
