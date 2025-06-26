@@ -44,15 +44,32 @@ export const Login = async (req, res) => {
       { expiresIn: "2h" }
     );
     res.cookie("token", token, {
-      maxAge: 7200000, // 2 hours in milliseconds
+      maxAge: 7200000,
       httpOnly: true,
-      secure: false, // Set to true only in production with HTTPS
-      sameSite: "lax", // Important for cross-site requests
+      secure: false,
+      sameSite: "lax",
       path: "/",
     });
     return res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const Logout = (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: false, // true if you're using HTTPS
+    });
+    return res
+      .status(200)
+      .json({ success: true, message: "Logged out successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
