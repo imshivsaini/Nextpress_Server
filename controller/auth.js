@@ -2,8 +2,8 @@ import { user } from "../Models/userSchema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { isValidEmailStrict } from "../middleware/emailValidator.js";
 dotenv.config();
-import { isValidEmailStrict } from "../middleware/emailValidator.js/index.js";
 
 export const Register = async (req, res) => {
   try {

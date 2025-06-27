@@ -11,7 +11,7 @@ export const AddUrl = async (req, res) => {
         message: "URL parameter is required",
       });
     }
-// Database query for finding 
+    // Database query for finding
     const response = await url.findOne({
       url: urlParam,
     });
@@ -59,7 +59,9 @@ export const GetUrl = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -112,14 +114,15 @@ export const GetSpeUrl = async (req, res) => {
 
 export const UpdateSpeUrl = async (req, res) => {
   try {
-    const { content, root } = req.body;
+    const { content, root, status } = req.body;
     // Validate required fields
     if (!content && !root) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "At least one field (content or root) is required for update" 
+      return res.status(400).json({
+        success: false,
+        message: "At least one field (content or root) is required for update",
       });
     }
+
     // Find the URL record in the database
     const data = await url.findOne({ url: req.params.url });
     if (!data) {
@@ -129,18 +132,22 @@ export const UpdateSpeUrl = async (req, res) => {
     if (content !== undefined) {
       data.content = content;
     }
-    
+    if (status === "Published" || status === "Draft") {
+      data.status = status;
+    }
     if (root !== undefined) {
       data.root = root;
     }
     await data.save();
-    //data.updatedAt = new Date();
+
     return res
       .status(200)
       .json({ success: true, message: "Updated Successfully" });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ success: false, message: "Internal server error"});
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -148,10 +155,10 @@ export const DeleteUrl = async (req, res) => {
   try {
     // Extract and validate the ID parameter
     const id = req.params.id;
-     if (!id) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "ID parameter is required" 
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "ID parameter is required",
       });
     }
     // Find and delete the URL record
@@ -164,6 +171,8 @@ export const DeleteUrl = async (req, res) => {
       .json({ success: true, message: "Deleted Successfully" });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ success: false, message: "Internal server error"});
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
