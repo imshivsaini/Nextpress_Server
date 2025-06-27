@@ -9,12 +9,14 @@ const app = express();
 
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? "https://nextpress.genvwebsters.com"
-        : "http://localhost:3000",
+    origin: [
+      "https://nextpress.genvwebsters.com",
+      "http://localhost:3000", // for development
+    ],
     credentials: true,
     optionsSuccessStatus: 200,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
