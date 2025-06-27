@@ -60,6 +60,7 @@ export const Login = async (req, res) => {
       secure: true,
       sameSite: "none",
       path: "/",
+      domain: ".genvwebsters.com",
     });
     return res.status(200).json({ success: true });
   } catch (err) {
@@ -75,6 +76,7 @@ export const Logout = (req, res) => {
       path: "/",
       sameSite: "none",
       secure: true, // true if you're using HTTPS
+      domain: ".genvwebsters.com",
     });
     return res
       .status(200)
