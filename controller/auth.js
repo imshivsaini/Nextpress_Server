@@ -57,7 +57,7 @@ export const Login = async (req, res) => {
     res.cookie("token", token, {
       maxAge: 7200000,
       httpOnly: true,
-      secure: false,
+      secure: true,
       sameSite: "lax",
       path: "/",
     });
@@ -74,7 +74,7 @@ export const Logout = (req, res) => {
       httpOnly: true,
       path: "/",
       sameSite: "lax",
-      secure: false, // true if you're using HTTPS
+      secure: true, // true if you're using HTTPS
     });
     return res
       .status(200)
