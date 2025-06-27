@@ -22,11 +22,33 @@ export const AddUrl = async (req, res) => {
 
 export const GetUrl = async (req, res) => {
   try {
-    const data = await url.find();
-    return res.status(200).json({ success: true, data: data });
+    // Get page and limit from query params, with default values
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Calculate the number of documents to skip
+    const skip = (page - 1) * limit;
+
+    // Get total number of documents
+    const total = await url.countDocuments();
+
+    // Get the paginated data
+    const data = await url.find().skip(skip).limit(limit);
+
+    // Calculate total pages
+    const total_pages = Math.ceil(total / limit);
+
+    return res.status(200).json({
+      success: true,
+      data,
+      page,
+      limit,
+      total,
+      total_pages,
+    });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ success: false, error: err });
+    return res.status(500).json({ success: false, error: err.message });
   }
 };
 
