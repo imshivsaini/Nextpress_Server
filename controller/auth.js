@@ -108,7 +108,7 @@ export const requestPasswordReset = async (req, res, next) => {
       expiresIn: "15m",
     });
     const resetURL =
-      `http//localhost:8000/api/auth/resetpassword?id=${User._id}&token=${token}`; // Reset URL to be Inserted
+      `http://localhost:8000/api/auth/resetpassword?id=${User._id}&token=${token}`; // Reset URL to be Inserted
 
     const mailOptions = {
       to: User.email,
