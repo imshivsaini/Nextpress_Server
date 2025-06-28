@@ -9,10 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [
-      "https://nextpress.genvwebsters.com",
-      "http://localhost:3000", // for development
-    ],
+    origin: ["https://nextpress.genvwebsters.com", "http://localhost:3000"],
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

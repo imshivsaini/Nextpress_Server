@@ -57,10 +57,13 @@ export const Login = async (req, res) => {
     res.cookie("token", token, {
       maxAge: 7200000,
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
-      domain: ".genvwebsters.com",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".genvwebsters.com"
+          : "localhost",
     });
     return res.status(200).json({ success: true });
   } catch (err) {
@@ -74,9 +77,12 @@ export const Logout = (req, res) => {
     res.clearCookie("token", {
       httpOnly: true,
       path: "/",
-      sameSite: "none",
-      secure: true, // true if you're using HTTPS
-      domain: ".genvwebsters.com",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NEXT_ENV, // true if you're using HTTPS
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".genvwebsters.com"
+          : "localhost",
     });
     return res
       .status(200)
