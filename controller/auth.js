@@ -78,7 +78,7 @@ export const Logout = (req, res) => {
       httpOnly: true,
       path: "/",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      secure: process.env.NEXT_ENV, // true if you're using HTTPS
+      secure: process.env.NODE_ENV, // true if you're using HTTPS
       domain:
         process.env.NODE_ENV === "production"
           ? ".genvwebsters.com"
