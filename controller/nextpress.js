@@ -33,18 +33,28 @@ export const AddUrl = async (req, res) => {
 
 export const GetUrl = async (req, res) => {
   try {
-    // Get page and limit from query params, with default values
+    // Get page, limit, and search from query params, with default values
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
 
     // Calculate the number of documents to skip
     const skip = (page - 1) * limit;
 
-    // Get total number of documents
-    const total = await url.countDocuments();
+    let searchQuery = {};
 
-    // Get the paginated data
-    const data = await url.find().skip(skip).limit(limit);
+    if (search.trim()) {
+      const searchRegex = new RegExp(search.trim(), "i");
+      searchQuery = {
+        $or: [{ url: { $regex: searchRegex } }],
+      };
+    }
+
+    // Get total number of documents matching the search
+    const total = await url.countDocuments(searchQuery);
+
+    // Get the paginated and filtered data
+    const data = await url.find(searchQuery).skip(skip).limit(limit);
 
     // Calculate total pages
     const total_pages = Math.ceil(total / limit);
@@ -56,6 +66,8 @@ export const GetUrl = async (req, res) => {
       limit,
       total,
       total_pages,
+      search: search || null,
+      has_search: !!search.trim(),
     });
   } catch (err) {
     console.log(err);
@@ -64,7 +76,6 @@ export const GetUrl = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
-
 export const GetSpeUrl = async (req, res) => {
   try {
     // Input validation
