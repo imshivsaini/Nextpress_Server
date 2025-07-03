@@ -4,7 +4,6 @@ const urlSchema = new mongoose.Schema(
   {
     url: {
       type: String,
-      unique: true,
       required: true,
     },
     content: {
@@ -17,6 +16,11 @@ const urlSchema = new mongoose.Schema(
       type: String,
       enum: ["Published", "Draft"],
       default: "Draft",
+    },
+    publisherId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "user",
     },
   },
   {

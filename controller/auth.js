@@ -50,7 +50,7 @@ export const Login = async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
     const token = jwt.sign(
-      { id: email, username: CurrUser.username },
+      { mail: email, username: CurrUser.username, id: CurrUser._id },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );

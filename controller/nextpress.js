@@ -1,5 +1,5 @@
 import url from "../Models/url.js";
-
+import mongoose from "mongoose";
 export const AddUrl = async (req, res) => {
   try {
     // Input validation
@@ -14,14 +14,16 @@ export const AddUrl = async (req, res) => {
     // Database query for finding
     const response = await url.findOne({
       url: urlParam,
+      publisherId: req.user.id,
     });
     if (response) {
       return res
         .status(409)
         .json({ success: false, message: "Already Exists" });
     }
+    const requestData = { url: urlParam, publisherId: req.user.id };
     // Database query for Creation
-    await url.create(req.body);
+    await url.create(requestData);
     return res
       .status(200)
       .json({ success: true, message: "Added Successfully" });
@@ -33,30 +35,70 @@ export const AddUrl = async (req, res) => {
 
 export const GetUrl = async (req, res) => {
   try {
-    // Get page, limit, and search from query params, with default values
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search || "";
-
-    // Calculate the number of documents to skip
     const skip = (page - 1) * limit;
 
-    let searchQuery = {};
+    // Convert publisherId from string to ObjectId
+    const publisherId = new mongoose.Types.ObjectId(req.user.id);
+
+    // Build combined search query
+    let searchQuery = {
+      publisherId: publisherId,
+    };
 
     if (search.trim()) {
       const searchRegex = new RegExp(search.trim(), "i");
       searchQuery = {
-        $or: [{ url: { $regex: searchRegex } }],
+        $and: [
+          { publisherId: publisherId },
+          {
+            $or: [
+              { url: { $regex: searchRegex } },
+              { status: { $regex: searchRegex } },
+            ],
+          },
+        ],
       };
     }
 
-    // Get total number of documents matching the search
     const total = await url.countDocuments(searchQuery);
 
-    // Get the paginated and filtered data
-    const data = await url.find(searchQuery).skip(skip).limit(limit);
+    const data = await url.aggregate([
+      { $match: searchQuery },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "users", // Collection name for users
+          localField: "publisherId",
+          foreignField: "_id",
+          as: "publisher",
+        },
+      },
+      {
+        $unwind: {
+          path: "$publisher",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          url: 1,
+          content: 1,
+          root: 1,
+          status: 1,
+          publisherId: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          "publisher._id": 1,
+          "publisher.username": 1,
+        },
+      },
+    ]);
 
-    // Calculate total pages
     const total_pages = Math.ceil(total / limit);
 
     return res.status(200).json({
@@ -70,15 +112,17 @@ export const GetUrl = async (req, res) => {
       has_search: !!search.trim(),
     });
   } catch (err) {
-    console.log(err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    console.error("Error in GetUrl:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
   }
 };
+
 export const GetSpeUrl = async (req, res) => {
   try {
-    // Input validation
     const { url: urlParam } = req.params;
 
     if (!urlParam) {
@@ -100,7 +144,9 @@ export const GetSpeUrl = async (req, res) => {
     }
 
     // Database query
-    const data = await url.findOne({ url: decodedUrl }).lean();
+    const data = await url
+      .findOne({ url: decodedUrl, publisherId: req.user.id })
+      .lean();
 
     if (!data) {
       return res.status(404).json({
@@ -126,7 +172,7 @@ export const GetSpeUrl = async (req, res) => {
 export const UpdateSpeUrl = async (req, res) => {
   try {
     const { content, root, status } = req.body;
-    // Validate required fields
+
     if (!content && !root) {
       return res.status(400).json({
         success: false,
@@ -134,12 +180,11 @@ export const UpdateSpeUrl = async (req, res) => {
       });
     }
 
-    // Find the URL record in the database
     const data = await url.findOne({ url: req.params.url });
     if (!data) {
       return res.status(404).json({ success: false, message: "Not found" });
     }
-    // Update fields only if provided in request body
+
     if (content !== undefined) {
       data.content = content;
     }
